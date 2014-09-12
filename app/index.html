@@ -23,42 +23,66 @@
   <![endif]-->
 
   <div class="container" ng-controller="View1Ctrl">
+  <h1>Subnetting is Fun!</h1>
+
+  <p>
+  Here is a new, all-Javascript version of my original web-based quiz to practice your subnetting skills. Given an IP and a netmask, you derive the network and broadcast addresses. I wrote it to prep for the 
+  <a href="http://www.cisco.com/web/learning/certifications/associate/ccna/index.html">CCNA</a> 
+  exam and to sharpen my on-the-job subnetting skills.
+  I recommend reading Chris Bloomfield's
+  <a href="http://www.subnettingmadeeasy.blogspot.com/2007/11/subnetting-made-easy-lesson.html">Subnetting Made Easy</a> that gives an excellent and mercifully short explanation of how to subnet.
+  </p>
+
+  <p>
+   If you're interested, the source code is <a href="https://github.com/skehlet/subnetting-is-fun">available on Github</a>, 
+   and you can 
+   <a href="http://www.kehlet.cx/articles/79.html">read my original post about it</a> from March 2004.
+   This new version (from a decade later) is all Javascript, 
+   <a href="https://angularjs.org/">Angular.js</a>,
+   and <a href="http://getbootstrap.com/">Bootstrap</a>--no more backend PHP/Apache server! I motivated to rewrite it so I could move my blog to 
+   <a href="http://docs.aws.amazon.com/gettingstarted/latest/swh/website-hosting-intro.html">Amazon's static website hosting through S3</a>.
+   If you find any bugs or have feedback, 
+   <a href="https://github.com/skehlet/subnetting-is-fun/issues">submit an issue</a>
+   or <a href="mailto:steve.kehlet@gmail.com">drop me an email</a>.
+   Good luck and have fun!
+  </p>
+
 
   <div class="row">
 
     <div class="col-sm-5">
-      <h2>Problem</h2>
+      <h3>Problem</h3>
       <form ng-submit="submit()">
         <table class="table table-bordered">
 
           <tr>
-            <td class="col-sm-2" style="font-weight: bold; text-align: right; vertical-align: middle">IP Address:</td>
+            <td class="col-sm-2 tdlabel">IP Address:</td>
             <td class="col-sm-2">{{current.ip.toDottedDecimalString()}}</td>
           </tr>
 
           <tr>
-            <td style="font-weight: bold; text-align: right; vertical-align: middle">Netmask:</td>
+            <td class="tdlabel">Netmask:</td>
             <td>{{current.netmask.toDottedDecimalString()}}</td>
           </tr>
 
           <tr>
-            <td style="font-weight: bold; text-align: right; vertical-align: middle">Network Address:</td>
+            <td class="tdlabel">Network Address:</td>
             <td>
               <input type="text" 
-                   class="form-control" 
-                   ng-model="current.networkAnswer" 
-                   auto-focus 
-                   placeholder="Provide the correct Network Address, e.g. x.x.x.x">
+                     class="form-control" 
+                     ng-model="current.networkAnswer" 
+                     auto-focus 
+                     placeholder="x.x.x.x">
             </td>
           </tr>
 
           <tr>
-            <td style="font-weight: bold; text-align: right; vertical-align: middle" class="control-label">Broadcast Address:</td>
+            <td class="tdlabel">Broadcast Address:</td>
             <td>
               <input type="text" 
-                   class="form-control" 
-                   ng-model="current.broadcastAnswer" 
-                     placeholder="Provide the correct Broadcast Address, e.g. x.x.x.x">{{myform.broadcastAnswer.$error}}
+                     class="form-control" 
+                     ng-model="current.broadcastAnswer" 
+                     placeholder="x.x.x.x">{{myform.broadcastAnswer.$error}}
             </td>
           </tr>
 
@@ -74,17 +98,17 @@
     </div>
 
     <div ng-if="previous" class="col-sm-7">
-      <h2>Results</h2>
+      <h3>Results</h3>
       <table class="table table-bordered">
 
         <tr>
-          <td class="col-sm-2" style="font-weight: bold; text-align: right; vertical-align: middle">IP Address:</td>
+          <td class="col-sm-2 tdlabel">IP Address:</td>
           <td class="col-sm-2">{{previous.ip.toDottedDecimalString()}}</td>
           <td class="col-sm-4">&nbsp;</td>
         </tr>
 
         <tr>
-          <td style="font-weight: bold; text-align: right; vertical-align: middle">Netmask:</td>
+          <td class="tdlabel">Netmask:</td>
           <td>{{previous.netmask.toDottedDecimalString()}}</td>
           <td>&nbsp;</td>
         </tr>
@@ -95,10 +119,9 @@
             'bg-success': previous.networkAnswerIsCorrect,
             'bg-warning': !previous.networkAnswerIsCorrect,
           }">
-          <td style="font-weight: bold; text-align: right; vertical-align: middle" 
-              class="control-label"
+          <td class="tdlabel control-label"
               >Network Address:</td>
-          <td class="control-label">{{previous.networkAnswer.toDottedDecimalString()}}</td>
+          <td class="control-label">{{previous.networkAnswer}}</td>
           <td class="control-label" ng-if="previous.networkAnswerIsCorrect">
             <span class="glyphicon glyphicon-ok"></span> 
             Correct
@@ -115,10 +138,9 @@
             'bg-success': previous.broadcastAnswerIsCorrect,
             'bg-warning': !previous.broadcastAnswerIsCorrect,
           }">
-          <td style="font-weight: bold; text-align: right; vertical-align: middle" 
-              class="control-label"
+          <td class="tdlabel control-label"
               >Broadcast Address:</td>
-          <td class="control-label">{{previous.broadcastAnswer.toDottedDecimalString()}}</td>
+          <td class="control-label">{{previous.broadcastAnswer}}</td>
           <td class="control-label" ng-if="previous.broadcastAnswerIsCorrect">
             <span class="glyphicon glyphicon-ok"></span> 
             Correct
@@ -136,7 +158,7 @@
 
 
 
-
+    <hr>
     <footer>Subnetting Is Fun: v<span app-version></span></footer>
   </div>
 

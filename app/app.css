@@ -28,3 +28,9 @@
   content: "";
   padding: 0;
 }
+
+.tdlabel {
+  font-weight: bold;
+  text-align: right;
+  vertical-align: middle
+}
