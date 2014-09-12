@@ -1,13 +1,6 @@
 'use strict';
 
-angular.module('myApp.view1', ['ngRoute'])
-
-.config(['$routeProvider', function($routeProvider) {
-  $routeProvider.when('/view1', {
-    templateUrl: 'view1/view1.html',
-    controller: 'View1Ctrl'
-  });
-}])
+angular.module('myApp')
 .controller('View1Ctrl', ['$scope', function($scope) {
 
 	function DottedDecimalIp(oct1, oct2, oct3, oct4) {

@@ -7,7 +7,7 @@
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <title>Subnetting Is Fun</title>
-  <meta name="description" content="A quiz for practicing subnetting">
+  <meta name="description" content="An online tool for practicing subnetting.">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="bower_components/html5-boilerplate/css/normalize.css">
   <link rel="stylesheet" href="bower_components/html5-boilerplate/css/main.css">
@@ -17,18 +17,128 @@
   <script src="bower_components/html5-boilerplate/js/vendor/modernizr-2.6.2.min.js"></script>
 </head>
 <body>
-  <ul class="menu">
-    <li><a href="#/view1">view1</a></li>
-    <li><a href="#/view2">view2</a></li>
-  </ul>
 
   <!--[if lt IE 7]>
       <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
   <![endif]-->
 
-  <div ng-view></div>
+  <div class="container" ng-controller="View1Ctrl">
 
-  <div>Angular seed app: v<span app-version></span></div>
+  <div class="row">
+
+    <div class="col-sm-5">
+      <h2>Problem</h2>
+      <form ng-submit="submit()">
+        <table class="table table-bordered">
+
+          <tr>
+            <td class="col-sm-2" style="font-weight: bold; text-align: right; vertical-align: middle">IP Address:</td>
+            <td class="col-sm-2">{{current.ip.toDottedDecimalString()}}</td>
+          </tr>
+
+          <tr>
+            <td style="font-weight: bold; text-align: right; vertical-align: middle">Netmask:</td>
+            <td>{{current.netmask.toDottedDecimalString()}}</td>
+          </tr>
+
+          <tr>
+            <td style="font-weight: bold; text-align: right; vertical-align: middle">Network Address:</td>
+            <td>
+              <input type="text" 
+                   class="form-control" 
+                   ng-model="current.networkAnswer" 
+                   auto-focus 
+                   placeholder="Provide the correct Network Address, e.g. x.x.x.x">
+            </td>
+          </tr>
+
+          <tr>
+            <td style="font-weight: bold; text-align: right; vertical-align: middle" class="control-label">Broadcast Address:</td>
+            <td>
+              <input type="text" 
+                   class="form-control" 
+                   ng-model="current.broadcastAnswer" 
+                     placeholder="Provide the correct Broadcast Address, e.g. x.x.x.x">{{myform.broadcastAnswer.$error}}
+            </td>
+          </tr>
+
+          <tr>
+            <td colspan="2">
+              <input type="submit" class="btn btn-primary" value="Submit">
+              <input type="button" class="btn btn-default" value="Skip" ng-click="skip()">
+            </td>
+          </tr>
+
+        </table>
+      </form>
+    </div>
+
+    <div ng-if="previous" class="col-sm-7">
+      <h2>Results</h2>
+      <table class="table table-bordered">
+
+        <tr>
+          <td class="col-sm-2" style="font-weight: bold; text-align: right; vertical-align: middle">IP Address:</td>
+          <td class="col-sm-2">{{previous.ip.toDottedDecimalString()}}</td>
+          <td class="col-sm-4">&nbsp;</td>
+        </tr>
+
+        <tr>
+          <td style="font-weight: bold; text-align: right; vertical-align: middle">Netmask:</td>
+          <td>{{previous.netmask.toDottedDecimalString()}}</td>
+          <td>&nbsp;</td>
+        </tr>
+
+        <tr ng-class="{ 
+            'has-success': previous.networkAnswerIsCorrect,
+            'has-error': !previous.networkAnswerIsCorrect,
+            'bg-success': previous.networkAnswerIsCorrect,
+            'bg-warning': !previous.networkAnswerIsCorrect,
+          }">
+          <td style="font-weight: bold; text-align: right; vertical-align: middle" 
+              class="control-label"
+              >Network Address:</td>
+          <td class="control-label">{{previous.networkAnswer.toDottedDecimalString()}}</td>
+          <td class="control-label" ng-if="previous.networkAnswerIsCorrect">
+            <span class="glyphicon glyphicon-ok"></span> 
+            Correct
+          </td>
+          <td class="control-label" ng-if="!previous.networkAnswerIsCorrect">
+            <span class="glyphicon glyphicon-remove"></span> 
+            No, the correct answer is {{previous.network.toDottedDecimalString()}}.
+          </td>
+        </tr>
+
+        <tr ng-class="{ 
+            'has-success': previous.broadcastAnswerIsCorrect,
+            'has-error': !previous.broadcastAnswerIsCorrect,
+            'bg-success': previous.broadcastAnswerIsCorrect,
+            'bg-warning': !previous.broadcastAnswerIsCorrect,
+          }">
+          <td style="font-weight: bold; text-align: right; vertical-align: middle" 
+              class="control-label"
+              >Broadcast Address:</td>
+          <td class="control-label">{{previous.broadcastAnswer.toDottedDecimalString()}}</td>
+          <td class="control-label" ng-if="previous.broadcastAnswerIsCorrect">
+            <span class="glyphicon glyphicon-ok"></span> 
+            Correct
+          </td>
+          <td class="control-label" ng-if="!previous.broadcastAnswerIsCorrect">
+            <span class="glyphicon glyphicon-remove"></span> 
+            No, the correct answer is {{previous.broadcast.toDottedDecimalString()}}.
+          </td>
+        </tr>
+
+      </table>
+    </div><!-- ng-if="previous" -->
+
+  </div><!-- row -->
+
+
+
+
+    <footer>Subnetting Is Fun: v<span app-version></span></footer>
+  </div>
 
   <script src="//code.jquery.com/jquery-1.11.0.min.js"></script>
   <script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
@@ -40,8 +150,7 @@
   -->
   <script src="bower_components/angular-route/angular-route.js"></script>
   <script src="app.js"></script>
-  <script src="view1/view1.js"></script>
-  <script src="view2/view2.js"></script>
+  <script src="view1.js"></script>
   <script src="components/version/version.js"></script>
   <script src="components/version/version-directive.js"></script>
   <script src="components/version/interpolate-filter.js"></script>
