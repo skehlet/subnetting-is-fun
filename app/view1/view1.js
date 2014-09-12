@@ -8,31 +8,6 @@ angular.module('myApp.view1', ['ngRoute'])
     controller: 'View1Ctrl'
   });
 }])
-
-.directive('stevek', function() {
-  var INTEGER_REGEXP = /^\-?\d+$/;
-  console.log('stevek directive initialized');
-  return {
-    require: 'ngModel',
-    link: function(scope, elm, attrs, ctrl) {
-      ctrl.$parsers.push(function(viewValue) {
-        // if (INTEGER_REGEXP.test(viewValue)) {
-        //   // it is valid
-        //   ctrl.$setValidity('integer', true);
-        //   return viewValue;
-        // } else {
-        //   // it is invalid, return undefined (no model update)
-        //   ctrl.$setValidity('integer', false);
-        //   return undefined;
-        // }
-        ctrl.$setValidity('stevek', false);
-	    console.log('stevek directive fired');
-        return undefined;
-      });
-    }
-  };
-})
-
 .controller('View1Ctrl', ['$scope', function($scope) {
 
 	function DottedDecimalIp(oct1, oct2, oct3, oct4) {
@@ -61,6 +36,9 @@ angular.module('myApp.view1', ['ngRoute'])
         			network.oct3 | (~netmask.oct3 & 0xff),
         			network.oct4 | (~netmask.oct4 & 0xff)
     			);
+    		},
+    		equals: function(other) {
+    			return this.toDottedDecimalString() == other.toDottedDecimalString();
     		}
 		};
 	}
@@ -132,30 +110,42 @@ angular.module('myApp.view1', ['ngRoute'])
 	    return ip;
 	}
 
-	var netmask;
-	var ip;
-	var network;
-	var broadcast;
-
 	function newProblem() {
-		netmask = generateMask();
-		ip = generateIp(netmask);
-		network = ip.getNetwork(netmask);
-		broadcast = ip.getBroadcast(netmask);
-		$scope.netmask = netmask.toDottedDecimalString();
-		$scope.ip = ip.toDottedDecimalString();
-		// $scope.networkAnswer = ip.getNetwork(netmask).toDottedDecimalString();
-		// $scope.broadcastAnswer = ip.getBroadcast(netmask).toDottedDecimalString();
+		var netmask = generateMask();
+		var ip = generateIp(netmask);
+		$scope.current = {
+			ip: ip,
+			netmask: netmask,
+			network: ip.getNetwork(netmask),
+			broadcast: ip.getBroadcast(netmask),
+			networkAnswer: ip.getNetwork(netmask).toDottedDecimalString(),
+			broadcastAnswer: ip.getBroadcast(netmask).toDottedDecimalString()
+		};
 	}
 
 	newProblem();
 
 	$scope.submit = function() {
-		$scope.networkAnswerIsCorrect = ($scope.networkAnswer == network.toDottedDecimalString());
-		$scope.broadcastAnswerIsCorrect = ($scope.broadcastAnswer == broadcast.toDottedDecimalString());
+		var validIpRegex = /^\d+\.\d+\.\d+\.\d+$/;
+
+		$scope.previous = $scope.current;
+	
+		if (validIpRegex.test($scope.previous.networkAnswer)) {
+			var octets = $scope.previous.networkAnswer.split('.');
+			$scope.previous.networkAnswer = DottedDecimalIp(octets[0], octets[1], octets[2], octets[3]);
+			$scope.previous.networkAnswerIsCorrect = ($scope.previous.networkAnswer.equals($scope.previous.network));
+		}
+
+		if (validIpRegex.test($scope.previous.broadcastAnswer)) {
+			var octets = $scope.previous.broadcastAnswer.split('.');
+			$scope.previous.broadcastAnswer = DottedDecimalIp(octets[0], octets[1], octets[2], octets[3]);
+			$scope.previous.broadcastAnswerIsCorrect = ($scope.previous.broadcastAnswer.equals($scope.previous.broadcast));
+		}
+
+		newProblem();
 	};
 
 	$scope.skip = function() {
-		console.log('skipping');
+		newProblem();
 	};
 }]);
