@@ -1,40 +1,53 @@
 'use strict';
 
 angular.module('myApp')
-.controller('View1Ctrl', ['$scope', function($scope) {
+.controller('View1Ctrl', function($scope, $location) {
 
-    function DottedDecimalIp(oct1, oct2, oct3, oct4) {
-        var octs = [oct1, oct2, oct3, oct4];
+    var DottedDecimalIp = (function() {
+        var validIpRegex = /^\d+\.\d+\.\d+\.\d+$/;
         return {
-            oct1: oct1,
-            oct2: oct2,
-            oct3: oct3,
-            oct4: oct4,
-            toDottedDecimalString: function() {
-                return octs.join('.');
+            fromString: function(ipString) {
+                if (validIpRegex.test(ipString)) {
+                    var octets = ipString.split('.');
+                    return DottedDecimalIp.new(octets[0], octets[1], octets[2], octets[3]);
+                } else {
+                    return null;
+                }
             },
-            getNetwork: function(netmask) {
-                return DottedDecimalIp(
-                    oct1 & netmask.oct1,
-                    oct2 & netmask.oct2,
-                    oct3 & netmask.oct3,
-                    oct4 & netmask.oct4
-                );
-            },
-            getBroadcast: function(netmask) {
-                var network = this.getNetwork(netmask);
-                return DottedDecimalIp(
-                    network.oct1 | (~netmask.oct1 & 0xff),
-                    network.oct2 | (~netmask.oct2 & 0xff),
-                    network.oct3 | (~netmask.oct3 & 0xff),
-                    network.oct4 | (~netmask.oct4 & 0xff)
-                );
-            },
-            equals: function(other) {
-                return this.toDottedDecimalString() == other.toDottedDecimalString();
+            new: function(oct1, oct2, oct3, oct4) {
+                var octs = [oct1, oct2, oct3, oct4];
+                return {
+                    oct1: oct1,
+                    oct2: oct2,
+                    oct3: oct3,
+                    oct4: oct4,
+                    toDottedDecimalString: function() {
+                        return octs.join('.');
+                    },
+                    getNetwork: function(netmask) {
+                        return DottedDecimalIp.new(
+                            oct1 & netmask.oct1,
+                            oct2 & netmask.oct2,
+                            oct3 & netmask.oct3,
+                            oct4 & netmask.oct4
+                        );
+                    },
+                    getBroadcast: function(netmask) {
+                        var network = this.getNetwork(netmask);
+                        return DottedDecimalIp.new(
+                            network.oct1 | (~netmask.oct1 & 0xff),
+                            network.oct2 | (~netmask.oct2 & 0xff),
+                            network.oct3 | (~netmask.oct3 & 0xff),
+                            network.oct4 | (~netmask.oct4 & 0xff)
+                        );
+                    },
+                    equals: function(other) {
+                        return this.toDottedDecimalString() == other.toDottedDecimalString();
+                    }
+                };
             }
         };
-    }
+    })();
 
     // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/random
     // Returns a random integer between min (included) and max (excluded)
@@ -67,7 +80,7 @@ angular.module('myApp')
             }
         }
 
-        return DottedDecimalIp(octs[0], octs[1], octs[2], octs[3]);
+        return DottedDecimalIp.new(octs[0], octs[1], octs[2], octs[3]);
     }
 
     // Generate a "sane" IP:
@@ -82,7 +95,7 @@ angular.module('myApp')
             var oct2 = getRandomInt(0, 256);
             var oct3 = getRandomInt(0, 256);
             var oct4 = getRandomInt(0, 256);
-            var ip = DottedDecimalIp(oct1, oct2, oct3, oct4);
+            var ip = DottedDecimalIp.new(oct1, oct2, oct3, oct4);
             var network = ip.getNetwork(netmask);
             var broadcast = ip.getBroadcast(netmask);
             var ipString = ip.toDottedDecimalString();
@@ -111,29 +124,57 @@ angular.module('myApp')
         };
     }
 
+    function populatePreviousFromQueryParams() {
+        var queryParams = $location.search();
+        $scope.previous.networkAnswer = queryParams.networkAnswer;
+        $scope.previous.broadcastAnswer = queryParams.broadcastAnswer;
+        if (queryParams.ip && queryParams.netmask) {
+            $scope.previous.ip = DottedDecimalIp.fromString(queryParams.ip);
+            $scope.previous.netmask = DottedDecimalIp.fromString(queryParams.netmask);
+            if ($scope.previous.ip && $scope.previous.netmask) {
+                $scope.previous.network = $scope.previous.ip.getNetwork($scope.previous.netmask);
+                $scope.previous.broadcast = $scope.previous.ip.getBroadcast($scope.previous.netmask);
+                scorePrevious();
+            }
+        }
+    }
+
+    function populateQueryParamsFromPrevious() {
+        $location.search({
+            ip: $scope.previous.ip.toDottedDecimalString(),
+            netmask: $scope.previous.netmask.toDottedDecimalString(),
+            networkAnswer: $scope.previous.networkAnswer,
+            broadcastAnswer: $scope.previous.broadcastAnswer
+        });
+    }
+
+    function scorePrevious() {
+        var networkAnswerIp = DottedDecimalIp.fromString($scope.previous.networkAnswer);
+        if (networkAnswerIp) {
+            $scope.previous.networkAnswerIsCorrect = (networkAnswerIp.equals($scope.previous.network));
+        }
+        var broadcastAnswerIp = DottedDecimalIp.fromString($scope.previous.broadcastAnswer);
+        if (broadcastAnswerIp) {
+            $scope.previous.broadcastAnswerIsCorrect = (broadcastAnswerIp.equals($scope.previous.broadcast));
+        }
+    }
+
+    $scope.current = $scope.previous = {};
+    populatePreviousFromQueryParams();
     newProblem();
 
     $scope.submit = function() {
-        var validIpRegex = /^\d+\.\d+\.\d+\.\d+$/;
-
         $scope.previous = $scope.current;
-    
-        if (validIpRegex.test($scope.previous.networkAnswer)) {
-            var octets = $scope.previous.networkAnswer.split('.');
-            var networkAnswerIp = DottedDecimalIp(octets[0], octets[1], octets[2], octets[3]);
-            $scope.previous.networkAnswerIsCorrect = (networkAnswerIp.equals($scope.previous.network));
-        }
-
-        if (validIpRegex.test($scope.previous.broadcastAnswer)) {
-            var octets = $scope.previous.broadcastAnswer.split('.');
-            var broadcastAnswerIp = DottedDecimalIp(octets[0], octets[1], octets[2], octets[3]);
-            $scope.previous.broadcastAnswerIsCorrect = (broadcastAnswerIp.equals($scope.previous.broadcast));
-        }
-
+        scorePrevious();
+        populateQueryParamsFromPrevious();
         newProblem();
     };
 
     $scope.skip = function() {
         newProblem();
     };
-}]);
+})
+.config(function($locationProvider) {
+  $locationProvider.html5Mode(true).hashPrefix('!');
+});
+
