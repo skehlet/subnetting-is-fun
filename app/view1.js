@@ -174,6 +174,7 @@ angular.module('myApp')
         scorePrevious();
         populateQueryParamsFromPrevious();
         newProblem();
+        $('#networkAnswer').focus();
     };
 
     $scope.skip = function() {
