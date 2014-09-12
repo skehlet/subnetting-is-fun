@@ -122,6 +122,7 @@ angular.module('myApp')
             network: ip.getNetwork(netmask),
             broadcast: ip.getBroadcast(netmask)
         };
+        startTime = (new Date()).getTime();
     }
 
     function populatePreviousFromQueryParams() {
@@ -157,9 +158,14 @@ angular.module('myApp')
         if (broadcastAnswerIp) {
             $scope.previous.broadcastAnswerIsCorrect = (broadcastAnswerIp.equals($scope.previous.broadcast));
         }
+        if (startTime) {
+            var msTaken = (new Date()).getTime() - startTime;
+            $scope.previous.secondsTaken = Math.round(msTaken/1000 * 10) / 10;
+        }
     }
 
     $scope.current = $scope.previous = {};
+    var startTime = null;
     populatePreviousFromQueryParams();
     newProblem();
 
